@@ -39,10 +39,13 @@ export default function Header({
             </>
           ) : (
             <>
-              <Link href="/signin" className="px-btn px-btn-ghost px-btn-sm">
+              <Link
+                href="/auth/signin"
+                className="px-btn px-btn-ghost px-btn-sm"
+              >
                 Sign in
               </Link>
-              <Link href="/signup" className="px-btn px-btn-sm">
+              <Link href="/auth/signup" className="px-btn px-btn-sm">
                 Sign up
               </Link>
             </>

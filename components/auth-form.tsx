@@ -1,89 +1,94 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-
-interface AuthFormProps {
-  title: string;
-  description: string;
-  buttonText: string;
-  onSubmit: (email: string, password: string) => Promise<void>;
-  mode?: "signin" | "signup";
-}
+import Link from "next/link";
+import { useActionState } from "react";
+import {
+  signInAction,
+  signUpAction,
+  type AuthState,
+} from "../app/account-actions";
 
 export default function AuthForm({
-  title,
-  description,
-  buttonText,
-  onSubmit,
-  mode = "signin",
-}: AuthFormProps) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  mode,
+  next,
+}: {
+  mode: "signin" | "signup";
+  next: string;
+}) {
+  const [state, action, pending] = useActionState<AuthState, FormData>(
+    mode === "signin" ? signInAction : signUpAction,
+    {},
+  );
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    setLoading(true);
-    setError("");
-
-    try {
-      await onSubmit(email, password);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const v = state.values ?? {};
+  const q = next === "/" ? "" : `?next=${encodeURIComponent(next)}`;
 
   return (
-    <div className="px-auth">
-      <h1 className="px-title">{title}</h1>
+    <form key={JSON.stringify(v)} action={action} className="px-form">
+      <input type="hidden" name="next" value={next} />
 
-      <p className="px-muted">{description}</p>
+      {state.error && (
+        <p className="px-err" role="alert">
+          {state.error}
+        </p>
+      )}
 
-      <form onSubmit={handleSubmit} className="px-form">
-        {error && (
-          <p className="px-err" role="alert">
-            {error}
-          </p>
-        )}
-
+      {mode === "signup" && (
         <div className="px-field">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="displayName">Display name</label>
           <input
-            id="email"
-            name="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
+            id="displayName"
+            name="displayName"
+            defaultValue={v.displayName}
+            autoComplete="nickname"
+            maxLength={40}
             required
           />
         </div>
+      )}
 
-        <div className="px-field">
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            minLength={mode === "signup" ? 8 : undefined}
-            maxLength={72}
-            autoComplete={
-              mode === "signup" ? "new-password" : "current-password"
-            }
-            required
-          />
-        </div>
+      <div className="px-field">
+        <label htmlFor="email">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          defaultValue={v.email}
+          autoComplete="email"
+          required
+        />
+      </div>
 
-        <button className="px-btn" type="submit" disabled={loading}>
-          {loading ? "Please wait..." : buttonText}
-        </button>
-      </form>
-    </div>
+      <div className="px-field">
+        <label htmlFor="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          minLength={mode === "signup" ? 8 : undefined}
+          maxLength={72}
+          autoComplete={mode === "signup" ? "new-password" : "current-password"}
+          required
+        />
+      </div>
+
+      <button className="px-btn" type="submit" disabled={pending}>
+        {pending
+          ? "Please wait…"
+          : mode === "signin"
+            ? "Sign in"
+            : "Create account"}
+      </button>
+
+      <p className="px-muted">
+        {mode === "signin" ? "New here? " : "Already have an account? "}
+        <Link
+          href={`${mode === "signin" ? "/signup" : "/signin"}${q}`}
+          className="px-link"
+        >
+          {mode === "signin" ? "Create an account" : "Sign in"}
+        </Link>
+      </p>
+    </form>
   );
 }

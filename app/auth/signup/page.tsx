@@ -1,36 +1,28 @@
-"use client";
+import { redirect } from "next/navigation";
+import { getCurrentUser, safeNext } from "../../../lib/auth";
+import AuthForm from "../../../components/auth-form";
 
-import AuthForm from "@/components/auth-form";
-import { useRequest } from "@/hooks/use-request";
-import { useRouter } from "next/navigation";
+export default async function SignUpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const next = safeNext((await searchParams).next);
 
-export default function SignUpPage() {
-  const router = useRouter();
-
-  const { doRequest } = useRequest({
-    url: "/api/users/signup",
-    method: "post",
-    onSuccess: () => {
-      router.push("/landing");
-    },
-  });
-
-  const handleSignUp = async (email: string, password: string) => {
-    await doRequest({
-      email,
-      password,
-    });
-  };
+  if (await getCurrentUser()) {
+    redirect(next);
+  }
 
   return (
     <main className="px-app">
       <section className="px-panel px-auth">
-        <AuthForm
-          title="Create an account"
-          description="Enter your email and password to create your account."
-          buttonText="Sign up"
-          onSubmit={handleSignUp}
-        />
+        <h1 className="px-title">Create your account</h1>
+
+        <p className="px-muted" style={{ marginTop: "-0.75rem" }}>
+          One account lets you buy assets and sell your own.
+        </p>
+
+        <AuthForm mode="signup" next={next} />
       </section>
     </main>
   );

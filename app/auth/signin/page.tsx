@@ -1,36 +1,35 @@
-"use client";
+import { redirect } from "next/navigation";
+import { getCurrentUser, safeNext } from "../../../lib/auth";
+import AuthForm from "../../../components/auth-form";
 
-import AuthForm from "@/components/auth-form";
-import { useRequest } from "@/hooks/use-request";
-import { useRouter } from "next/navigation";
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const next = safeNext((await searchParams).next);
 
-export default function SignInPage() {
-  const router = useRouter();
+  if (await getCurrentUser()) {
+    redirect(next);
+  }
 
-  const { doRequest } = useRequest({
-    url: "/api/users/signin",
-    method: "post",
-    onSuccess: () => {
-      router.push("/landing");
-    },
-  });
-
-  const handleSignIn = async (email: string, password: string) => {
-    await doRequest({
-      email,
-      password,
-    });
-  };
+  const buying = next.startsWith("/cart") || next.startsWith("/checkout");
 
   return (
     <main className="px-app">
       <section className="px-panel px-auth">
-        <AuthForm
-          title="Welcome back"
-          description="Enter your email and password to sign in."
-          buttonText="Sign in"
-          onSubmit={handleSignIn}
-        />
+        <h1 className="px-title">Sign in</h1>
+
+        {buying && (
+          <p className="px-notice">Sign in to continue your purchase.</p>
+        )}
+
+        <AuthForm mode="signin" next={next} />
+
+        <p className="px-demo">
+          Demo: pixelhollow@demo.dev / demo1234 owns the sample listings. Other
+          sample creators use the same password.
+        </p>
       </section>
     </main>
   );
