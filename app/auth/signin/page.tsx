@@ -11,7 +11,6 @@ export default function SignInPage() {
     url: "/api/users/signin",
     method: "post",
     onSuccess: () => {
-      console.log("Signin successful!");
       router.push("/landing");
     },
   });
@@ -24,11 +23,15 @@ export default function SignInPage() {
   };
 
   return (
-    <AuthForm
-      title="Welcome back"
-      description="Enter your email and password to sign in."
-      buttonText="Sign in"
-      onSubmit={handleSignIn}
-    />
+    <main className="px-app">
+      <section className="px-panel px-auth">
+        <AuthForm
+          title="Welcome back"
+          description="Enter your email and password to sign in."
+          buttonText="Sign in"
+          onSubmit={handleSignIn}
+        />
+      </section>
+    </main>
   );
 }

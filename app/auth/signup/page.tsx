@@ -11,7 +11,6 @@ export default function SignUpPage() {
     url: "/api/users/signup",
     method: "post",
     onSuccess: () => {
-      console.log("Signup successful!");
       router.push("/landing");
     },
   });
@@ -24,11 +23,15 @@ export default function SignUpPage() {
   };
 
   return (
-    <AuthForm
-      title="Create an account"
-      description="Enter your email and password to create your account."
-      buttonText="Sign up"
-      onSubmit={handleSignUp}
-    />
+    <main className="px-app">
+      <section className="px-panel px-auth">
+        <AuthForm
+          title="Create an account"
+          description="Enter your email and password to create your account."
+          buttonText="Sign up"
+          onSubmit={handleSignUp}
+        />
+      </section>
+    </main>
   );
 }
